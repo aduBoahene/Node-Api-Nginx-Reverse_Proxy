@@ -32,3 +32,34 @@ jobs:
       run: |
         docker build -f Dockerfile.nginx -t ${{ secrets.DOCKER_USERNAME }}/nginx_reverse_proxy:latest .
         docker push ${{ secrets.DOCKER_USERNAME }}/nginx_reverse_proxy:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Install SSH client
+      run: sudo apt-get install -y openssh-client
+
+    - name: SSH into EC2 and Deploy
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+      run: |
+        # Add the SSH key to the SSH agent
+        echo "$PRIVATE_KEY" > /tmp/key.pem
+        chmod 600 /tmp/key.pem
+        ssh -o StrictHostKeyChecking=no -i /tmp/key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          # Pull the latest Docker images
+          docker pull ${{ secrets.DOCKER_USERNAME }}/node_express_app:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/nginx_reverse_proxy:latest
+          
+          # Stop and remove existing containers if they exist
+          docker stop node_express_app || true
+          docker rm node_express_app || true
+          docker stop nginx_reverse_proxy || true
+          docker rm nginx_reverse_proxy || true
+          
+          # Run the new containers
+          docker run -d --name node_express_app -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/node_express_app:latest
+          docker run -d --name nginx_reverse_proxy -p 80:80 --link node_express_app ${{ secrets.DOCKER_USERNAME }}/nginx_reverse_proxy:latest
+        EOF
