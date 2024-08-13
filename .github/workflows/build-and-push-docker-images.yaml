@@ -49,6 +49,15 @@ jobs:
         echo "$PRIVATE_KEY" > /tmp/key.pem
         chmod 600 /tmp/key.pem
         ssh -o StrictHostKeyChecking=no -i /tmp/key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+
+          # Update the package list and install Docker
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+
+          # Start and enable Docker service
+          sudo systemctl start docker
+          sudo systemctl enable docker
+
           # Pull the latest Docker images
           docker pull ${{ secrets.DOCKER_USERNAME }}/node_express_app:latest
           docker pull ${{ secrets.DOCKER_USERNAME }}/nginx_reverse_proxy:latest
