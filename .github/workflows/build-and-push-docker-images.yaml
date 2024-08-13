@@ -5,7 +5,7 @@ on:
     branches:
       - main  # Trigger the workflow on push to the main branch
   workflow_dispatch:
-    
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -58,20 +58,17 @@ jobs:
           sudo systemctl start docker
           sudo systemctl enable docker
 
-          # Add the current user to the Docker group to avoid permission issues
-          sudo usermod -aG docker ubuntu
-
           # Pull the latest Docker images
-          docker pull ${{ secrets.DOCKER_USERNAME }}/node_express_app:latest
-          docker pull ${{ secrets.DOCKER_USERNAME }}/nginx_reverse_proxy:latest
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/node_express_app:latest
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/nginx_reverse_proxy:latest
           
           # Stop and remove existing containers if they exist
-          docker stop node_express_app || true
-          docker rm node_express_app || true
-          docker stop nginx_reverse_proxy || true
-          docker rm nginx_reverse_proxy || true
+          sudo docker stop node_express_app || true
+          sudo docker rm node_express_app || true
+          sudo docker stop nginx_reverse_proxy || true
+          sudo docker rm nginx_reverse_proxy || true
           
           # Run the new containers
-          docker run -d --name node_express_app -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/node_express_app:latest
-          docker run -d --name nginx_reverse_proxy -p 80:80 --link node_express_app ${{ secrets.DOCKER_USERNAME }}/nginx_reverse_proxy:latest
+          sudo docker run -d --name node_express_app -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/node_express_app:latest
+          sudo docker run -d --name nginx_reverse_proxy -p 80:80 --link node_express_app ${{ secrets.DOCKER_USERNAME }}/nginx_reverse_proxy:latest
         EOF
