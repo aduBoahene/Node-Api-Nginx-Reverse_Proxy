@@ -58,6 +58,9 @@ jobs:
           sudo systemctl start docker
           sudo systemctl enable docker
 
+          # Add the current user to the Docker group to avoid permission issues
+          sudo usermod -aG docker ubuntu
+
           # Pull the latest Docker images
           docker pull ${{ secrets.DOCKER_USERNAME }}/node_express_app:latest
           docker pull ${{ secrets.DOCKER_USERNAME }}/nginx_reverse_proxy:latest
