@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.express
+    container_name: node_express_app
+    networks:
+      - app-network
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: nginx_reverse_proxy
+    depends_on:
+      - app
+    image: nginx
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
