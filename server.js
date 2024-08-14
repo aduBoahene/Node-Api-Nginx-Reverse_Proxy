@@ -6,7 +6,7 @@ const port = 3000;
 
 // Simple route for the home page
 app.get('/', (req, res) => {
-  res.send('Hello, World!');
+  res.send('THis is a reverse proxy example. Nginx forwarding requests to an express application');
 });
 
 
